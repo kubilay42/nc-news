@@ -3,7 +3,7 @@ const app = require("../db/app.js");
 const db = require("../db/connection.js");
 const testData = require("../db/data/test-data");
 const seed = require("../db/seeds/seed.js");
-const endpoints = require("../endpoints.json");
+const endpointsFile = require("../endpoints.json");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -41,7 +41,34 @@ describe("CORE: GET /api", () => {
       .expect(200)
       .then((response) => {
         const { endpoints } = response.body;
-        expect(endpoints).toBe(endpoints);
+        expect(endpoints).toEqual(endpointsFile);
+      });
+  });
+});
+
+describe("CORE: GET /api/articles/:article_id", () => {
+  test("should return an article object, which should have the article properties", () => {
+    return request(app)
+      .get("/api/articles/4")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.article.article_id).toBe(4);
+      });
+  });
+  test("GET:404 responds with an appropriate status and error message when provided a valid but non existing endpoint ", () => {
+    return request(app)
+      .get("/api/articles/4444")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
+    return request(app)
+      .get("/api/articles/not-an-article")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
       });
   });
 });
