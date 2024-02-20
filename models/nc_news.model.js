@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const endpoints = require("../endpoints.json")
 
 const selectTopics = () => {
   return db.query(`SELECT * FROM topics`).then((data) => {
@@ -6,4 +7,8 @@ const selectTopics = () => {
   });
 };
 
-module.exports = {selectTopics}
+const getEndpoints = () => {
+  return Promise.resolve({endpoints})
+}
+
+module.exports = {selectTopics, getEndpoints}
