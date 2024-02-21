@@ -21,4 +21,16 @@ const selectArticleById = (articleId) => {
       return article.rows[0];
     });
 };
-module.exports = { selectTopics, getEndpoints, selectArticleById };
+
+const getArticles = () => {
+  return db
+    .query(
+      `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT (comments.article_id):: INTEGER AS comment_count FROM comments RIGHT JOIN articles ON comments.article_id = articles.article_id
+  GROUP BY articles.article_id
+  ORDER BY articles.created_at DESC;`
+    )
+    .then((data) => {
+      return data.rows;
+    });
+};
+module.exports = { selectTopics, getEndpoints, selectArticleById, getArticles };
