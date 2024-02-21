@@ -72,3 +72,44 @@ describe("CORE: GET /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("CORE: GET /api/articles", () => {
+  test("GET : 200, should get an articles array of article objects, ", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        const { articles } = response.body;
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(article).toMatchObject({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            article_img_url: expect.any(String),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("the articles should be sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        const { articles } = response.body;
+        expect(articles).toBeSortedBy("created_at", {descending: true});
+      });
+  })
+  test("GET:404 responds with an appropriate status and error message when provided a non existent endpoint", () => {
+    return request(app)
+      .get("/api/nonexistentendpoint")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
+});

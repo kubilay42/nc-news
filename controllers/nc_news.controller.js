@@ -1,4 +1,4 @@
-const { selectTopics, getEndpoints,selectArticleById } = require("../models/nc_news.model");
+const { selectTopics, getEndpoints,selectArticleById, getArticles } = require("../models/nc_news.model");
 
 function getAllTopics(req, res, next) {
   selectTopics()
@@ -31,4 +31,15 @@ function getArticleById(req, res, next) {
   })
 }
 
-module.exports = { getAllTopics, getAllEndpoints, getArticleById };
+function getAllArticles(req, res, next) {
+  getArticles()
+  .then((articles) => {
+    res.status(200).send({articles})
+  })
+  .catch((err) => {
+    console.log(err)
+    next(err)
+  })
+}
+
+module.exports = { getAllTopics, getAllEndpoints, getArticleById, getAllArticles };
