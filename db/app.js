@@ -9,7 +9,8 @@ const {
   getAllArticles,
   getCommentForArticle,
   addCommentById,
-  updateArticles
+  updateArticles,
+  deleteCommentById
 } = require("../controllers/nc_news.controller");
 
 app.get("/api", getAllEndpoints);
@@ -19,12 +20,22 @@ app.get("/api/articles", getAllArticles);
 app.get("/api/articles/:article_id/comments", getCommentForArticle)
 app.post("/api/articles/:article_id/comments", addCommentById)
 app.patch("/api/articles/:article_id", updateArticles)
+app.delete("/api/comments/:comment_id", deleteCommentById);
+
+
 
 app.all("/*", (req, res, next) => {
   res.status(404).send({ msg: "Not found" });
   next(err);
 });
 
+app.use((err, req, res, next)=> {
+  if(err.status === 404 && err.msg === "Comment does not exist")
+  {res.status(err.status).send({ msg: err.msg })}
+  else{
+    next(err)
+  }
+})
 app.use((err, req, res, next) => {
   if (err.code === "23503") {
     res.status(404).send({ msg: "Not found" });

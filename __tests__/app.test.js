@@ -288,7 +288,7 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
 
 describe("PATCH /api/articles/:article_id", () => {
   test("200: should increment the article votes property and return the updtaed article", () => {
-    const newVotes = {inc_votes:1};
+    const newVotes = { inc_votes: 1 };
     return request(app)
       .patch("/api/articles/1")
       .send(newVotes)
@@ -298,8 +298,7 @@ describe("PATCH /api/articles/:article_id", () => {
           article_id: 1,
           votes: expect.any(Number),
         });
-        expect(response.body.article.votes).toBe(101)
-
+        expect(response.body.article.votes).toBe(101);
       });
   });
   test("200: should decrease the article votes property and return the updated article", () => {
@@ -315,12 +314,12 @@ describe("PATCH /api/articles/:article_id", () => {
           article_id: 1,
           votes: expect.any(Number),
         });
-        expect(response.body.article.votes).toBe(0)
+        expect(response.body.article.votes).toBe(0);
       });
   });
   test("400: should respond with bad request when given an invalid article id ", () => {
     const newVotes = {
-      inc_votes: 1
+      inc_votes: 1,
     };
     return request(app)
       .patch("/api/articles/non-existing-id")
@@ -330,14 +329,14 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(response.body.msg).toBe("Bad request");
       });
   });
-  test("400: shoudl give error when inc_votes is missing", () => {
+  test("200: should give article object when inc_votes is missing", () => {
     const newVotes = {};
     return request(app)
       .patch("/api/articles/1")
       .send(newVotes)
-      .expect(400)
+      .expect(200)
       .then((response) => {
-        expect(response.body.msg).toBe("Bad request");
+        expect(response.body.article).toMatchObject({ article_id: 1 });
       });
   });
   test("404 :should give appropriate error when article not found", () => {
@@ -345,11 +344,43 @@ describe("PATCH /api/articles/:article_id", () => {
       inc_votes: 1,
     };
     return request(app)
-      .patch("/api/article/1")
+      .patch("/api/articles/999")
       .send(newVotes)
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("Not found");
+      });
+  });
+  test("400: should give error when inc_votes property is not a number", () => {
+    const newVotes = { inc_votes: "not-a-number" };
+
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send(newVotes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+});
+describe("CORE: DELETE /api/comments/:comment_id", () => {
+  test("204: delete the given comment by comment_id. Sends nothing back.", () => {
+    return request(app).delete("/api/comments/5").expect(204);
+  });
+  test('DELETE:404 responds with an appropriate status and error message when given a non-existent id', () => {
+    return request(app)
+      .delete('/api/comments/999')
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe('Comment does not exist');
+      });
+  });
+  test('DELETE:400 responds with an appropriate status and error message when given an invalid id', () => {
+    return request(app)
+      .delete('/api/comments/not-a-comment')
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Bad request');
       });
   });
 });

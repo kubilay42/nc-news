@@ -5,7 +5,8 @@ const {
   getArticles,
   getComment,
   addComment,
-  updateArticleVotes
+  updateArticleVotes,
+  removeCommentById
 } = require("../models/nc_news.model");
 
 function getAllTopics(req, res, next) {
@@ -59,26 +60,46 @@ function getCommentForArticle(req, res, next) {
       next(err);
     });
 }
-  function addCommentById(req, res, next) {
-    const newComment = req.body;
+function addCommentById(req, res, next) {
+  const newComment = req.body;
   const { article_id } = req.params;
-    addComment(newComment, article_id).then((comment) => {
-      res.status(201).send({comment});
+  addComment(newComment, article_id)
+    .then((comment) => {
+      res.status(201).send({ comment });
     })
     .catch((err) => {
-      next(err)
-  })
+      next(err);
+    });
 }
-function updateArticles(req,res,next) {
-  const newVote = req.body.inc_votes
-  const {article_id} = req.params
-  updateArticleVotes(newVote, article_id).then((article)=> {
-    res.status(200).send({article})
+function updateArticles(req, res, next) {
+  const newVote = req.body.inc_votes;
+  const { article_id } = req.params;
+  if(newVote === undefined) {
+    selectArticleById(article_id).then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+  }
+  updateArticleVotes(newVote, article_id)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+function deleteCommentById(req, res, next) {
+  const { comment_id } = req.params;
+  removeCommentById(comment_id).then(() => {
+    res.status(204).send();
   })
   .catch((err) => {
-    next(err)
-  })
+    next(err);
+  });
 }
+
 
 module.exports = {
   getAllTopics,
@@ -87,5 +108,6 @@ module.exports = {
   getAllArticles,
   getCommentForArticle,
   addCommentById,
-  updateArticles
+  updateArticles,
+  deleteCommentById
 };
