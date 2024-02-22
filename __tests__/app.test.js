@@ -115,15 +115,32 @@ describe("CORE: GET /api/articles", () => {
 });
 
 describe("CORE: GET /api/articles/:article_id/comments", () => {
-  test("GET: 200, should get all comments for an article", () => {
+  test("GET: 200, should get all comments for an existing article", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then((response) => {
+        expect(response.body.comments.length).toBe(11);
+
         const { comments } = response.body;
         comments.forEach((comment) => {
-          expect(comment.article_id).toBe(1);
-        });
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            author: expect.any(String),
+            body: expect.any(String),
+            votes: expect.any(Number),
+            created_at: expect.any(String)
+          })
+        })
+      })
+    })
+  test("200: should return an empty array for an article that exists but has no comments", () => {
+    const articleIdWithoutComments = 2;
+    return request(app)
+      .get(`/api/articles/${articleIdWithoutComments}/comments`)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toEqual([]);
       });
   });
   test("Comments should be served with the most recent comments first. ", () => {
@@ -142,9 +159,17 @@ describe("CORE: GET /api/articles/:article_id/comments", () => {
       .then((response) => {
         expect(response.body.msg).toBe("Not found");
       });
-  })
-  //test for valid input
+  });
+  test("GET:404 responds with an appropriate status and error message when provided a invalid endpoint", () => {
+    return request(app)
+      .get("/api/articles/1/invalid-endpoint")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
 });
+
 describe("CORE: POST /api/articles/:article_id/comments", () => {
   test("POST: 201, should insert a new comment by the article Id", () => {
     const newComment = {
@@ -159,45 +184,104 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
         const { comment } = response.body;
         expect(comment.article_id).toBe(5);
         expect(comment.author).toBe("rogersop");
+        expect(comment.body).toBe("This article needs some more comments")
       });
-  })
-  test('GET:404 responds with an appropriate status and error message when provided a valid but non existing article id', () => {
-    const newComment = {
-      username: "rogersop",
-      body: "This article needs some more comments",
-    };
-    return request(app)
-    .post("/api/articles/999/comments")
-    .send(newComment)
-    .expect(404)
-    .then((response) => {
-      expect(response.body.msg).toBe("Not found");
-    });
   });
-  test('GET:404 responds with an appropriate status and error message when provided a valid but non existing article id', () => {
+  test("POST: 201, should ignore unnecessary properties in the request body", () => {
+    const newComment = {
+      username: "rogersop",
+      body: "This is a valid comment",
+      unnecessaryProperty: "This should be ignored"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then((response) => {
+        const { comment } = response.body;
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          author: "rogersop",
+          body: "This is a valid comment"
+        });
+        expect(comment.unnecessaryProperty).toBe(undefined);
+      });
+  });
+  test("POST:404 responds with an appropriate status and error message when provided a valid but non existing article id", () => {
     const newComment = {
       username: "rogersop",
       body: "This article needs some more comments",
     };
     return request(app)
-    .post("/api/articles/999/comments")
-    .send(newComment)
-    .expect(404)
-    .then((response) => {
-      expect(response.body.msg).toBe("Not found");
-    });
-  })
-  test('GET:404 responds with an appropriate status and error message when provided a non existing endpoint', () => {
+      .post("/api/articles/999/comments")
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
+  test("POST: 400, invalid article ID", () => {
+    const newComment = {
+      username: "rogersop",
+      body: "This is a valid comment"
+    };
+    return request(app)
+      .post("/api/articles/not-an-id/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+  test("POST: 400, missing required field 'username'", () => {
+    const newComment = {
+      body: "This comment has no username"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+  test("POST: 400, missing required field 'body'", () => {
+    const newComment = {
+      username: "rogersop"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+  test("POST: 404, invalid username", () => {
+    const newComment = {
+      username: "nonexistentuser",
+      body: "This is a valid comment"
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
+
+  test("POST:404 responds with an appropriate status and error message when provided a non existing endpoint", () => {
     const newComment = {
       username: "rogersop",
       body: "This article needs some more comments",
     };
     return request(app)
-    .post("/api/articles/5/non-existing-endpoint")
-    .send(newComment)
-    .expect(404)
-    .then((response) => {
-      expect(response.body.msg).toBe("Not found");
-    });
-  })
+      .post("/api/articles/5/non-existing-endpoint")
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
 });
