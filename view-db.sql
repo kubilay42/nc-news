@@ -1,4 +1,10 @@
 \c nc_news_test
 
-SELECT * FROM articles;
-SELECT * FROM comments;
+
+
+SELECT * FROM comments 
+FULL JOIN users
+ON comments.author = users.username;
+
+
+

@@ -55,7 +55,7 @@ describe("CORE: GET /api/articles/:article_id", () => {
         expect(response.body.article.article_id).toBe(4);
       });
   });
-  test("GET:404 responds with an appropriate status and error message when provided a valid but non existing endpoint ", () => {
+  test("GET:404 responds with an appropriate status and error message when provided a valid but non existing endpoint", () => {
     return request(app)
       .get("/api/articles/4444")
       .expect(404)
@@ -101,9 +101,9 @@ describe("CORE: GET /api/articles", () => {
       .expect(200)
       .then((response) => {
         const { articles } = response.body;
-        expect(articles).toBeSortedBy("created_at", {descending: true});
+        expect(articles).toBeSortedBy("created_at", { descending: true });
       });
-  })
+  });
   test("GET:404 responds with an appropriate status and error message when provided a non existent endpoint", () => {
     return request(app)
       .get("/api/nonexistentendpoint")
@@ -112,4 +112,92 @@ describe("CORE: GET /api/articles", () => {
         expect(response.body.msg).toBe("Not found");
       });
   });
+});
+
+describe("CORE: GET /api/articles/:article_id/comments", () => {
+  test("GET: 200, should get all comments for an article", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((response) => {
+        const { comments } = response.body;
+        comments.forEach((comment) => {
+          expect(comment.article_id).toBe(1);
+        });
+      });
+  });
+  test("Comments should be served with the most recent comments first. ", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((response) => {
+        const { comments } = response.body;
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("GET:404 responds with an appropriate status and error message when provided a valid but non existing article id", () => {
+    return request(app)
+      .get("/api/articles/999/comments")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  })
+  //test for valid input
+});
+describe("CORE: POST /api/articles/:article_id/comments", () => {
+  test("POST: 201, should insert a new comment by the article Id", () => {
+    const newComment = {
+      username: "rogersop",
+      body: "This article needs some more comments",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(newComment)
+      .expect(201)
+      .then((response) => {
+        const { comment } = response.body;
+        expect(comment.article_id).toBe(5);
+        expect(comment.author).toBe("rogersop");
+      });
+  })
+  test('GET:404 responds with an appropriate status and error message when provided a valid but non existing article id', () => {
+    const newComment = {
+      username: "rogersop",
+      body: "This article needs some more comments",
+    };
+    return request(app)
+    .post("/api/articles/999/comments")
+    .send(newComment)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe("Not found");
+    });
+  });
+  test('GET:404 responds with an appropriate status and error message when provided a valid but non existing article id', () => {
+    const newComment = {
+      username: "rogersop",
+      body: "This article needs some more comments",
+    };
+    return request(app)
+    .post("/api/articles/999/comments")
+    .send(newComment)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe("Not found");
+    });
+  })
+  test('GET:404 responds with an appropriate status and error message when provided a non existing endpoint', () => {
+    const newComment = {
+      username: "rogersop",
+      body: "This article needs some more comments",
+    };
+    return request(app)
+    .post("/api/articles/5/non-existing-endpoint")
+    .send(newComment)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe("Not found");
+    });
+  })
 });

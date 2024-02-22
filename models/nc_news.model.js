@@ -33,4 +33,42 @@ const getArticles = () => {
       return data.rows;
     });
 };
-module.exports = { selectTopics, getEndpoints, selectArticleById, getArticles };
+
+const getComment = (articleId) => {
+  return db
+    .query(
+      `SELECT * FROM comments 
+  LEFT JOIN articles
+   ON comments.article_id = articles.article_id
+   WHERE comments.article_id = $1
+   ORDER BY comments.created_at DESC`,
+      [articleId]
+    )
+    .then((data) => {
+      if (data.rows[0] === undefined) {
+        return Promise.reject();
+      }
+      return data.rows;
+    });
+};
+const addComment = ({username, body}, articleId) => {
+  return db.query(`
+  INSERT INTO comments (author, body, article_id)
+    VALUES ($1, $2, $3)
+    RETURNING *`,
+  [username, body, articleId]
+  )
+  .then((result) => {
+    console.log(result.rows[0])
+    return result.rows[0];
+  });
+};
+
+module.exports = {
+  selectTopics,
+  getEndpoints,
+  selectArticleById,
+  getArticles,
+  getComment,
+  addComment,
+};

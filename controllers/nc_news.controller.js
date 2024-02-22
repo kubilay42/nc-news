@@ -1,4 +1,11 @@
-const { selectTopics, getEndpoints,selectArticleById, getArticles } = require("../models/nc_news.model");
+const {
+  selectTopics,
+  getEndpoints,
+  selectArticleById,
+  getArticles,
+  getComment,
+  addComment,
+} = require("../models/nc_news.model");
 
 function getAllTopics(req, res, next) {
   selectTopics()
@@ -23,23 +30,52 @@ function getAllEndpoints(req, res, next) {
 function getArticleById(req, res, next) {
   const { article_id } = req.params;
   selectArticleById(article_id)
-  .then((article) => {
-    res.status(200).send({article})
-  })
-  .catch((err) => {
-    next(err)
-  })
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
 }
 
 function getAllArticles(req, res, next) {
   getArticles()
-  .then((articles) => {
-    res.status(200).send({articles})
-  })
-  .catch((err) => {
-    console.log(err)
-    next(err)
+    .then((articles) => {
+      res.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
+function getCommentForArticle(req, res, next) {
+  const { article_id } = req.params;
+  getComment(article_id)
+    .then((comments) => {
+      res.status(200).send({ comments });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+  function addCommentById(req, res, next) {
+    const newComment = req.body;
+  const { article_id } = req.params;
+    addComment(newComment, article_id).then((comment) => {
+      res.status(201).send({comment});
+    })
+    .catch((err) => {
+      console.log(err)
+      next(err)
   })
 }
 
-module.exports = { getAllTopics, getAllEndpoints, getArticleById, getAllArticles };
+
+module.exports = {
+  getAllTopics,
+  getAllEndpoints,
+  getArticleById,
+  getAllArticles,
+  getCommentForArticle,
+  addCommentById
+};
