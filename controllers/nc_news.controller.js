@@ -5,6 +5,7 @@ const {
   getArticles,
   getComment,
   addComment,
+  updateArticleVotes
 } = require("../models/nc_news.model");
 
 function getAllTopics(req, res, next) {
@@ -68,7 +69,16 @@ function getCommentForArticle(req, res, next) {
       next(err)
   })
 }
-
+function updateArticles(req,res,next) {
+  const newVote = req.body.inc_votes
+  const {article_id} = req.params
+  updateArticleVotes(newVote, article_id).then((article)=> {
+    res.status(200).send({article})
+  })
+  .catch((err) => {
+    next(err)
+  })
+}
 
 module.exports = {
   getAllTopics,
@@ -76,5 +86,6 @@ module.exports = {
   getArticleById,
   getAllArticles,
   getCommentForArticle,
-  addCommentById
+  addCommentById,
+  updateArticles
 };

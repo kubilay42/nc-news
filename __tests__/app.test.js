@@ -129,11 +129,11 @@ describe("CORE: GET /api/articles/:article_id/comments", () => {
             author: expect.any(String),
             body: expect.any(String),
             votes: expect.any(Number),
-            created_at: expect.any(String)
-          })
-        })
-      })
-    })
+            created_at: expect.any(String),
+          });
+        });
+      });
+  });
   test("200: should return an empty array for an article that exists but has no comments", () => {
     const articleIdWithoutComments = 2;
     return request(app)
@@ -184,14 +184,14 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
         const { comment } = response.body;
         expect(comment.article_id).toBe(5);
         expect(comment.author).toBe("rogersop");
-        expect(comment.body).toBe("This article needs some more comments")
+        expect(comment.body).toBe("This article needs some more comments");
       });
   });
   test("POST: 201, should ignore unnecessary properties in the request body", () => {
     const newComment = {
       username: "rogersop",
       body: "This is a valid comment",
-      unnecessaryProperty: "This should be ignored"
+      unnecessaryProperty: "This should be ignored",
     };
     return request(app)
       .post("/api/articles/1/comments")
@@ -202,7 +202,7 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
         expect(comment).toMatchObject({
           comment_id: expect.any(Number),
           author: "rogersop",
-          body: "This is a valid comment"
+          body: "This is a valid comment",
         });
         expect(comment.unnecessaryProperty).toBe(undefined);
       });
@@ -223,7 +223,7 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
   test("POST: 400, invalid article ID", () => {
     const newComment = {
       username: "rogersop",
-      body: "This is a valid comment"
+      body: "This is a valid comment",
     };
     return request(app)
       .post("/api/articles/not-an-id/comments")
@@ -235,7 +235,7 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
   });
   test("POST: 400, missing required field 'username'", () => {
     const newComment = {
-      body: "This comment has no username"
+      body: "This comment has no username",
     };
     return request(app)
       .post("/api/articles/1/comments")
@@ -247,7 +247,7 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
   });
   test("POST: 400, missing required field 'body'", () => {
     const newComment = {
-      username: "rogersop"
+      username: "rogersop",
     };
     return request(app)
       .post("/api/articles/1/comments")
@@ -260,7 +260,7 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
   test("POST: 404, invalid username", () => {
     const newComment = {
       username: "nonexistentuser",
-      body: "This is a valid comment"
+      body: "This is a valid comment",
     };
     return request(app)
       .post("/api/articles/1/comments")
@@ -279,6 +279,74 @@ describe("CORE: POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/5/non-existing-endpoint")
       .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: should increment the article votes property and return the updtaed article", () => {
+    const newVotes = {inc_votes:1};
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newVotes)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.article).toMatchObject({
+          article_id: 1,
+          votes: expect.any(Number),
+        });
+        expect(response.body.article.votes).toBe(101)
+
+      });
+  });
+  test("200: should decrease the article votes property and return the updated article", () => {
+    const newVotes = {
+      inc_votes: -100,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newVotes)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.article).toMatchObject({
+          article_id: 1,
+          votes: expect.any(Number),
+        });
+        expect(response.body.article.votes).toBe(0)
+      });
+  });
+  test("400: should respond with bad request when given an invalid article id ", () => {
+    const newVotes = {
+      inc_votes: 1
+    };
+    return request(app)
+      .patch("/api/articles/non-existing-id")
+      .send(newVotes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+  test("400: shoudl give error when inc_votes is missing", () => {
+    const newVotes = {};
+    return request(app)
+      .patch("/api/articles/1")
+      .send(newVotes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      });
+  });
+  test("404 :should give appropriate error when article not found", () => {
+    const newVotes = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/article/1")
+      .send(newVotes)
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("Not found");

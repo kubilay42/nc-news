@@ -34,7 +34,6 @@ const getArticles = () => {
     });
 };
 
-
 const getComment = (articleId) => {
   return db
     .query(`SELECT article_id FROM articles WHERE article_id = $1`, [articleId])
@@ -45,7 +44,7 @@ const getComment = (articleId) => {
         return db.query(
           `SELECT * FROM comments 
            WHERE article_id = $1
-           ORDER BY created_at DESC`, 
+           ORDER BY created_at DESC`,
           [articleId]
         );
       }
@@ -53,7 +52,7 @@ const getComment = (articleId) => {
     .then(({ rows }) => {
       return rows;
     });
-  };
+};
 
 const addComment = ({ username, body }, articleId) => {
   return db
@@ -69,6 +68,23 @@ const addComment = ({ username, body }, articleId) => {
     });
 };
 
+const updateArticleVotes = (newVote, articleId) => {
+  // console.log(newVote, articleId)
+  return db.query(
+    `UPDATE articles
+    SET votes = votes + $1
+    WHERE article_id = $2
+    RETURNING *`,
+    [newVote, articleId]
+  ).then((result )=> {
+
+    if(result.rows.length === 0){
+      return Promise.reject()
+    }
+    return result.rows[0]
+  })
+};
+
 module.exports = {
   selectTopics,
   getEndpoints,
@@ -76,4 +92,5 @@ module.exports = {
   getArticles,
   getComment,
   addComment,
+  updateArticleVotes
 };
