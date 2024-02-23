@@ -117,7 +117,7 @@ describe("CORE: GET /api/articles", () => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
-  test.only('404: should return an error when given a non-existent topic', () => {
+  test('404: should return an error when given a non-existent topic', () => {
     return request(app)
       .get('/api/articles?topic=notATopic')
       .expect(404)

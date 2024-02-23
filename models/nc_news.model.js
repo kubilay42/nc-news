@@ -3,7 +3,6 @@ const endpoints = require("../endpoints.json");
 
 const selectTopics = () => {
   return db.query(`SELECT * FROM topics`).then((data) => {
-    console.log(data.rows)
     return data.rows;
   });
 };
@@ -37,7 +36,6 @@ const getArticles = (topic) => {
   return db
     .query(query, values)
     .then((data) => {
-      console.log(data.rows)
       if(data.rows === undefined){
         return Promise.reject({ status: 404, msg: "Topic not found" })
       }
