@@ -22,14 +22,23 @@ const selectArticleById = (articleId) => {
     });
 };
 
-const getArticles = () => {
+const getArticles = (topic) => {
+  let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url,
+  COUNT(comment_id)::INT AS comment_count
+  FROM articles LEFT JOIN comments
+  ON comments.article_id = articles.article_id`;
+  const values = [];
+  if (topic) {
+    query += ` WHERE topic = $1`;
+    values.push(topic)
+  }
+  query += ` GROUP BY articles.article_id ORDER BY created_at DESC`;
   return db
-    .query(
-      `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT (comments.article_id):: INTEGER AS comment_count FROM comments RIGHT JOIN articles ON comments.article_id = articles.article_id
-  GROUP BY articles.article_id
-  ORDER BY articles.created_at DESC;`
-    )
+    .query(query, values)
     .then((data) => {
+      if(data.rows.length === 0){
+        return Promise.reject({ status: 404, msg: "Topic not found" })
+      }
       return data.rows;
     });
 };
@@ -86,26 +95,27 @@ const updateArticleVotes = (newVote, articleId) => {
 };
 
 const removeCommentById = (comment_id) => {
- return db
+  return db
     .query("DELETE FROM comments WHERE comment_id = $1 RETURNING *", [
       comment_id,
     ])
     .then((result) => {
-      if(result.rows.length === 0){
-        return Promise.reject({status:404, msg:"Comment does not exist"})
+      if (result.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Comment does not exist" });
       }
-      return result.rows
-    }) 
-}
+      return result.rows;
+    });
+};
 const getUsers = () => {
-return db.query(
-  `SELECT *
+  return db
+    .query(
+      `SELECT *
   FROM users`
-)
-.then((data) => {
-  return data.rows
-})
-}
+    )
+    .then((data) => {
+      return data.rows;
+    });
+};
 
 module.exports = {
   selectTopics,
@@ -116,5 +126,5 @@ module.exports = {
   addComment,
   updateArticleVotes,
   removeCommentById,
-  getUsers
+  getUsers,
 };
