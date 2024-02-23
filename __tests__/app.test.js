@@ -117,7 +117,7 @@ describe("CORE: GET /api/articles", () => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
-  test('404: should return an error when given a non-existent topic', () => {
+  test.only('404: should return an error when given a non-existent topic', () => {
     return request(app)
       .get('/api/articles?topic=notATopic')
       .expect(404)
@@ -132,6 +132,14 @@ describe("CORE: GET /api/articles", () => {
       .then((response) => {
         expect(response.body.msg).toBe("Not found");
       });
+  })
+  test('GET:200, should return an empty array when given a valid topic query but has no artcles', () => {
+    return request(app)
+    .get("/api/articles?topic=paper")
+    .expect(200)
+    .then((response) => {
+      expect(response.body).toEqual( {articles: []})
+    })
   });
 });
 
