@@ -10,7 +10,8 @@ const {
   getCommentForArticle,
   addCommentById,
   updateArticles,
-  deleteCommentById
+  deleteCommentById,
+  getAllUsers
 } = require("../controllers/nc_news.controller");
 
 app.get("/api", getAllEndpoints);
@@ -21,6 +22,7 @@ app.get("/api/articles/:article_id/comments", getCommentForArticle)
 app.post("/api/articles/:article_id/comments", addCommentById)
 app.patch("/api/articles/:article_id", updateArticles)
 app.delete("/api/comments/:comment_id", deleteCommentById);
+app.get("/api/users", getAllUsers)
 
 
 
