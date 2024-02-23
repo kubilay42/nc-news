@@ -74,7 +74,7 @@ describe("CORE: GET /api/articles/:article_id", () => {
 });
 
 describe("CORE: GET /api/articles", () => {
-  test("GET : 200, should get an articles array of article objects, ", () => {
+  test("GET:200, should return all articles when no topic query is provided", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -95,6 +95,19 @@ describe("CORE: GET /api/articles", () => {
         });
       });
   });
+  test('200: should filter articles by the topic value specified in the query', () => {
+    return request(app)
+      .get('/api/articles?topic=mitch')
+      .expect(200)
+      .then((response) => {
+        const {articles} = response.body
+        expect(articles.length).toBe(12)
+        articles.forEach(article => {
+          expect(article.topic).toBe('mitch');
+        });
+      });
+  });
+
   test("the articles should be sorted by date in descending order", () => {
     return request(app)
       .get("/api/articles")
@@ -102,6 +115,14 @@ describe("CORE: GET /api/articles", () => {
       .then((response) => {
         const { articles } = response.body;
         expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test('404: should return an error when given a non-existent topic', () => {
+    return request(app)
+      .get('/api/articles?topic=notATopic')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Topic not found');
       });
   });
   test("GET:404 responds with an appropriate status and error message when provided a non existent endpoint", () => {
