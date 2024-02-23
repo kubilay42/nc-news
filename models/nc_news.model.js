@@ -97,6 +97,15 @@ const removeCommentById = (comment_id) => {
       return result.rows
     }) 
 }
+const getUsers = () => {
+return db.query(
+  `SELECT *
+  FROM users`
+)
+.then((data) => {
+  return data.rows
+})
+}
 
 module.exports = {
   selectTopics,
@@ -107,4 +116,5 @@ module.exports = {
   addComment,
   updateArticleVotes,
   removeCommentById,
+  getUsers
 };

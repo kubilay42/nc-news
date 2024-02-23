@@ -2,9 +2,8 @@
 
 
 
-SELECT * FROM comments 
-FULL JOIN users
-ON comments.author = users.username;
+SELECT * FROM users;
+
 
 
 
