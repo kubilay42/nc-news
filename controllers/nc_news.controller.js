@@ -8,6 +8,8 @@ const {
   updateArticleVotes,
   removeCommentById,
   getUsers,
+  
+  
 } = require("../models/nc_news.model");
 
 function getAllTopics(req, res, next) {
@@ -34,7 +36,7 @@ function getArticleById(req, res, next) {
   const { article_id } = req.params;
   selectArticleById(article_id)
     .then((article) => {
-      res.status(200).send({ article });
+      res.status(200).send( {article} );
     })
     .catch((err) => {
       next(err);
@@ -95,6 +97,7 @@ function updateArticles(req, res, next) {
         res.status(200).send({ article });
       })
       .catch((err) => {
+        console.log(err)
         next(err);
       });
   }

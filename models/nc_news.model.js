@@ -11,16 +11,29 @@ const getEndpoints = () => {
   return Promise.resolve({ endpoints });
 };
 
-const selectArticleById = (articleId) => {
+const selectArticleById= (articleId) => {
+  let query = `SELECT articles.article_id,articles.author,articles.title,articles.body, articles.topic, articles.created_at, articles.votes, articles.article_img_url,
+  COUNT(comment_id)::INT
+  AS comment_count
+  FROM articles
+  FULL JOIN comments
+  ON comments.article_id = articles.article_id`;
+  const values = [];
+  if (articleId) {
+    query += ` WHERE articles.article_id = $1`;
+    values.push(articleId)
+  }
+  query += ` GROUP BY articles.article_id`;
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
-    .then((article) => {
-      if (article.rows[0] === undefined) {
-        return Promise.reject();
+    .query(query, values)
+    .then((data) => {
+      if(data.rows === undefined || data.rows.length === 0){
+        return Promise.reject({ status: 404, msg: "Article Id not found" })
       }
-      return article.rows[0];
+      return data.rows[0];
     });
 };
+
 
 const getArticles = (topic) => {
   let query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url,

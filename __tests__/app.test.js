@@ -55,12 +55,32 @@ describe("CORE: GET /api/articles/:article_id", () => {
         expect(response.body.article.article_id).toBe(4);
       });
   });
+
+  test("should return an article object, which includes the comment count of that article", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then((response) => {
+        const {article} = response.body
+        expect(article).toMatchObject({
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number)
+        });
+      });
+  });
   test("GET:404 responds with an appropriate status and error message when provided a valid but non existing endpoint", () => {
     return request(app)
       .get("/api/articles/4444")
       .expect(404)
       .then((response) => {
-        expect(response.body.msg).toBe("Not found");
+        expect(response.body.msg).toBe("Article Id not found");
       });
   });
   test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
@@ -71,7 +91,28 @@ describe("CORE: GET /api/articles/:article_id", () => {
         expect(response.body.msg).toBe("Bad request");
       });
   });
-});
+  test('should return all articles if no parameters passed in', () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        const { articles } = response.body;
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(article).toMatchObject({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            article_img_url: expect.any(String),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  });
 
 describe("CORE: GET /api/articles", () => {
   test("GET:200, should return all articles when no topic query is provided", () => {

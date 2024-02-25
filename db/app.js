@@ -39,6 +39,13 @@ app.use((err, req, res, next)=> {
   }
 })
 app.use((err, req, res, next)=> {
+  if(err.status === 404 && err.msg === "Article Id not found")
+  {res.status(err.status).send({ msg: err.msg })}
+  else{
+    next(err)
+  }
+})
+app.use((err, req, res, next)=> {
   if(err.status === 404 && err.msg === "Topic not found")
   {res.status(err.status).send({ msg: err.msg })}
   else{

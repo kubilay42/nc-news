@@ -1,0 +1,6 @@
+You are now connected to database "nc_news_test" as user "kubilay42".
+ article_id | article_count 
+------------+---------------
+          4 |             1
+(1 row)
+
