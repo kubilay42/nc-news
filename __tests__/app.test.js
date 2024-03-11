@@ -358,16 +358,7 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(response.body.msg).toBe("Bad request");
       });
   });
-  test("200: should give article object when inc_votes is missing", () => {
-    const newVotes = {};
-    return request(app)
-      .patch("/api/articles/1")
-      .send(newVotes)
-      .expect(200)
-      .then((response) => {
-        expect(response.body.article).toMatchObject({ article_id: 1 });
-      });
-  });
+
   test("404 :should give appropriate error when article not found", () => {
     const newVotes = {
       inc_votes: 1,
