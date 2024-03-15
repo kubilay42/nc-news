@@ -43,26 +43,28 @@ function getArticleById(req, res, next) {
 
 function getAllArticles(req, res, next) {
   const { topic } = req.query;
-  const validTopics = ['mitch','cats','paper']
-  if(!topic){
-    getArticles().then((articles) => {
-      res.status(200).send({ articles });
-    })
-    .catch((err) => {
-      next(err);
-    });
-  }else if(topic && validTopics.includes(topic)){
-    selectTopics()
-    .then(getArticles(topic)
-    .then((articles) => {
-      res.status(200).send({ articles })
-    })
-    .catch((err) => {
-      next(err);
-    })
-    )}else{return Promise.reject({ status: 404, msg: "Topic not found" })
+  selectTopics().then((topics)=>{
+    const validTopics = topics.map((topic)=>(topic.slug))
+    if(!topic){
+      getArticles().then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch((err) => {
+        next(err);
+      });
+    }else if(topic && validTopics.includes(topic)){
+      selectTopics()
+      .then(getArticles(topic)
+      .then((articles) => {
+        res.status(200).send({ articles })
+      })
+      .catch((err) => {
+        next(err);
+      })
+      )}else{return Promise.reject({ status: 404, msg: "Topic not found" })
       .catch((err) => {
         next(err)})}
+      })
   }
   
 function getCommentForArticle(req, res, next) {

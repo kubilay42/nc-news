@@ -95,15 +95,15 @@ describe("CORE: GET /api/articles", () => {
         });
       });
   });
-  test('200: should filter articles by the topic value specified in the query', () => {
+  test("200: should filter articles by the topic value specified in the query", () => {
     return request(app)
-      .get('/api/articles?topic=mitch')
+      .get("/api/articles?topic=mitch")
       .expect(200)
       .then((response) => {
-        const {articles} = response.body
-        expect(articles.length).toBe(12)
-        articles.forEach(article => {
-          expect(article.topic).toBe('mitch');
+        const { articles } = response.body;
+        expect(articles.length).toBe(12);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
         });
       });
   });
@@ -117,12 +117,12 @@ describe("CORE: GET /api/articles", () => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
-  test('404: should return an error when given a non-existent topic', () => {
+  test("404: should return an error when given a non-existent topic", () => {
     return request(app)
-      .get('/api/articles?topic=notATopic')
+      .get("/api/articles?topic=notATopic")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('Topic not found');
+        expect(body.msg).toBe("Topic not found");
       });
   });
   test("GET:404 responds with an appropriate status and error message when provided a non existent endpoint", () => {
@@ -132,14 +132,14 @@ describe("CORE: GET /api/articles", () => {
       .then((response) => {
         expect(response.body.msg).toBe("Not found");
       });
-  })
-  test('GET:200, should return an empty array when given a valid topic query but has no artcles', () => {
+  });
+  test("GET:200, should return an empty array when given a valid topic query but has no artcles", () => {
     return request(app)
-    .get("/api/articles?topic=paper")
-    .expect(200)
-    .then((response) => {
-      expect(response.body).toEqual( {articles: []})
-    })
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toEqual({ articles: [] });
+      });
   });
 });
 
@@ -413,13 +413,13 @@ describe("CORE: GET /api/users", () => {
         const { users } = response.body;
         expect(Array.isArray(users)).toBe(true);
         expect(users.length).toBe(4);
-        users.forEach((user)=> {
+        users.forEach((user) => {
           expect(user).toMatchObject({
             username: expect.any(String),
             name: expect.any(String),
-            avatar_url: expect.any(String)
-          })
-        })
+            avatar_url: expect.any(String),
+          });
+        });
       });
   });
   test("GET:404 responds with an appropriate status and error message when provided a non existent endpoint", () => {
